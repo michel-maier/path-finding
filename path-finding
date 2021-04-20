@@ -1,0 +1,33 @@
+#!/bin/env php
+<?php
+include_once 'include/utils.php';
+
+const DEBUG_PROPS = [
+    'a-star'        => ['p' => 'c', 'c' => 4],
+    'dijkstra'      => ['p' => 'd', 'c' => 4],
+    'breadth-first' => ['p' => 'd', 'c' => 1],
+    'greedy'        => ['p' => 'h', 'c' => 4],
+];
+
+$mapNames = ['empty'] + choicesFromDirectory(__DIR__ . '/map');
+printf('Select a map to resolve:' . PHP_EOL);
+displayChoices($mapNames);
+$mapName = ask($mapNames);
+$map = 'empty' === $mapName ? emptyMap() : getMapFromFile($mapName);
+displayMap($map);
+askclosed('Compare all ?') && compareAll($map, $dryRun = true) && compareAll($map) && exit();
+$algos = choicesFromDirectory(__DIR__ . '/algo');
+printf('Select an algo to apply:' . PHP_EOL);
+displayChoices($algos);
+$algoName = ask($algos);
+
+printf('');
+$dirs = askclosed('On 8 directions?') ? DIRS_8 : DIRS_4;
+
+$algo = require_once(__DIR__ . "/algo/$algoName.php");
+['layer' => $layer, 'map' => $result, 'time' => $time, 'path' => $path, 'iterations' => $iterations] = $algo($map, ['dirs' => $dirs]);
+displayMap($map, $layer);
+
+printf('%sAlgorithm executed in %f ms%s',  PHP_EOL, $time * 1000, PHP_EOL);
+printf('%sin %d path(s) in %d iterations %s',  PHP_EOL, count($path), $iterations, PHP_EOL);
+askclosed('Debug it ?') && debugMap($result, DEBUG_PROPS[$algoName]['p'], DEBUG_PROPS[$algoName]['c']);
