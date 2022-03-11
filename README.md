@@ -1,6 +1,6 @@
-##Path finding in php
+## Path finding in php
 
-###Usage
+### Usage
 
 ```bash
  
